@@ -1,0 +1,71 @@
+Delete Voting Pod:-
+--------------------
+[root@ip-172-31-25-232 ~]# kubectl delete pod vote-94849dc97-szj8m; kubectl get pods
+pod "vote-94849dc97-szj8m" deleted
+NAME                      READY   STATUS    RESTARTS   AGE
+db-b54cd94f4-g6p94        1/1     Running   0          23m
+redis-868d64d78-nkxdt     1/1     Running   0          23m
+result-5d57b59f4b-lkdcx   1/1     Running   0          23m
+vote-94849dc97-8ss4q      1/1     Running   0          12s   <<<<<<<<
+worker-dd46d7584-wn865    1/1     Running   0          23m
+[root@ip-172-31-25-232 ~]#
+
+Observation:- There were 8 votes Cats-75% and Dogs-25% and no change is observed on result/vote link and results are intact.
+New votig pod is created with new name and same is updated on voting link.
+
+Delete Worker Pod:-
+-------------------
+[root@ip-172-31-25-232 ~]# kubectl delete pod worker-dd46d7584-wn865; kubectl get pods
+pod "worker-dd46d7584-wn865" deleted
+NAME                      READY   STATUS    RESTARTS   AGE
+db-b54cd94f4-g6p94        1/1     Running   0          33m
+redis-868d64d78-nkxdt     1/1     Running   0          33m
+result-5d57b59f4b-lkdcx   1/1     Running   0          33m
+vote-94849dc97-8ss4q      1/1     Running   0          10m
+worker-dd46d7584-9vsgp    1/1     Running   0          32s
+[root@ip-172-31-25-232 ~]#
+
+Observation :- No impact on links and result.
+
+Delete DB pod:-
+----------------
+[root@ip-172-31-25-232 ~]# kubectl delete pod db-b54cd94f4-g6p94; kubectl get pods
+pod "db-b54cd94f4-g6p94" deleted
+NAME                      READY   STATUS    RESTARTS   AGE
+db-b54cd94f4-nm297        1/1     Running   0          32s   <<<<<<<<<<<<<<<<<<<<<<<<
+redis-868d64d78-nkxdt     1/1     Running   0          37m
+result-5d57b59f4b-lkdcx   1/1     Running   0          37m
+vote-94849dc97-8ss4q      1/1     Running   0          13m
+worker-dd46d7584-9vsgp    0/1     Error     0          3m52s  <<<<<<<<<<<<<<<<<<<<<<<<<<
+[root@ip-172-31-25-232 ~]#
+
+Observation:- Votes are cleared on result link, worker pod went to error state and restarted.
+New results are not captured as link between DB pod and result pod is broken.
+
+After few seconds,
+[root@ip-172-31-25-232 ~]# kubectl get pods
+NAME                      READY   STATUS    RESTARTS   AGE
+db-b54cd94f4-nm297        1/1     Running   0          9m53s
+redis-868d64d78-nkxdt     1/1     Running   0          46m
+result-5d57b59f4b-lkdcx   1/1     Running   0          46m
+vote-94849dc97-sfs6k      1/1     Running   0          5m1s
+worker-dd46d7584-9vsgp    1/1     Running   1          13m
+[root@ip-172-31-25-232 ~]#
+
+
+Delete Result pod:-
+-------------------
+
+[root@ip-172-31-25-232 ~]# kubectl delete pod result-5d57b59f4b-lkdcx
+pod "result-5d57b59f4b-lkdcx" deleted
+[root@ip-172-31-25-232 ~]# kubectl get pods
+NAME                      READY   STATUS    RESTARTS   AGE
+db-b54cd94f4-nm297        1/1     Running   0          21m
+redis-868d64d78-nkxdt     1/1     Running   0          57m
+result-5d57b59f4b-ng94f   1/1     Running   0          48s
+vote-94849dc97-sfs6k      1/1     Running   0          16m
+worker-dd46d7584-v8q4g    1/1     Running   0          10m
+[root@ip-172-31-25-232 ~]#
+
+Observation:- Previous vote counts are not recovered but new results are captured now.
+
